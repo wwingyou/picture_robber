@@ -5,8 +5,8 @@ require 'open-uri'
 require 'selenium-webdriver'
 require 'base64'
 
-if ARGV[0].nil? 
-  puts "Usage: robber <keyword>"
+if ARGV[0].nil?
+  puts 'Usage: robber <keyword>'
   exit 1
 end
 
@@ -30,23 +30,24 @@ src_match = %r{^data:image/(png|jpeg|jpg);base64,([A-Za-z0-9+/=]+)$}
 # 이미지 요소 리스트 가져오기
 images = driver.find_elements(tag_name: 'img', class: 'rg_i')
 
-puts "Found #{images.size} images"
-
 Dir.mkdir(base_dir_name) unless Dir.exist?(base_dir_name)
 Dir.mkdir(dir_name)
 
-index = 0
+count = 0
 images.each do |image|
-  index += 1
   match_data = src_match.match(image.attribute('src'))
   next unless match_data
+
+  count += 1
 
   file_content = Base64.decode64(match_data[2])
 
   # 바이너리 데이터를 쓰기 위해 'b' 옵션을 줌
-  File.open("#{dir_name}/image_#{index}.#{match_data[1]}", 'wb') do |file|
+  File.open("#{dir_name}/image_#{count}.#{match_data[1]}", 'wb') do |file|
     file.write(file_content)
   end
 end
+
+puts "#{count}개의 이미지 다운로드 완료"
 
 driver.quit
